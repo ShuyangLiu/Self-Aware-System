@@ -9,8 +9,8 @@
 (load "sliu_src.lisp")
 
 ;; Helper Function to get a list of keys in the hashtable
-(defun hash-keys (hash-table)
-  (loop for key being the hash-keys of hash-table collect key))
+; (defun hash-keys (hash-table)
+;   (loop for key being the hash-keys of hash-table collect key))
 
 ;; restore the configuration of *beliefs* and *ep-memory* after testing 
 (defun cleanup ()
@@ -32,7 +32,15 @@
 	(make-op
 		:action '(goes_to AG Plaza)
 		:preconds '((has_money AG) (not (is_at AG Plaza)) (is_empty-handed AG))
-		:effects '((is_at AG Plaza))))
+		:effects '((is_at AG Plaza) (not (car (gethash '(is_at AG nil) *beliefs*))))))
+
+(defparameter *go_to_school*
+	(make-op
+		:action '(goes_to AG School)
+		:preconds '((has_money AG) (not (is_at AG School)))
+		:effects '((is_at AG School) (not (car (gethash '(is_at AG nil) *beliefs*))))))
+
+
 
 ;; Testing the helper functions 
 (defun test_look-up-kb ()
