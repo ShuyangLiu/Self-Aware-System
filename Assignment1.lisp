@@ -77,6 +77,7 @@
 (add-subsum 'has_ample_money 'has_money)
 (add-subsum 'has_100_bucks 'has_50_bucks)
 (add-subsum 'has_50_bucks 'has_money)
+(add-subsum 'is_very_afraid 'is_afraid)
 
 ;;Degrees
 (defparameter *initial-degrees*
@@ -155,6 +156,7 @@
 ;; b
 (defun remove-formula (w kb)
 	"remove formula from knowledge base"
+
 	(cond 	((eql 2 (list-length w))
 				(let ((k1 w)
 						(k2 (list (car w) nil)))
@@ -164,6 +166,9 @@
 							(setf (gethash k2 kb) (remove w (gethash k2 kb) :test 'equal )))
 					))
 			((eql 3 (list-length w))
+				(if (equal 'CURRENT (car (cdr (cdr w))))
+					(setf w (car (gethash (list (car w) (cadr w) nil) kb))))
+
 				(let ((k1 w)
 					  (k2 (list (car w) (nth 1 w) nil))
 					  (k3 (list (car w) nil (nth 2 w)))
@@ -185,6 +190,7 @@
 
 (defun store-formula (w kb)
 	"store new knowledge to the global knowledge base beliefs"
+
 	;; remove incompatible formulas
 	(if (equal (gethash (gethash (car w) *spectra3*) *spectra2*) 'fluent)
 		(let ((type (gethash (car w) *spectra3*)))
@@ -192,12 +198,6 @@
 				(loop for pred in spectrum 
 					do (remove-formula (cons pred (cdr w)) kb)))))
 	(cond 	((eql 2 (list-length w))
-				;; remove incompatible formulas
-				; (if (equal (gethash (gethash (car w) *spectra3*) *spectra2*) 'fluent)
-				; 	(let ((type (gethash (car w) *spectra3*)))
-				; 		(let ((spectrum (gethash type *spectra1*)))
-				; 			(loop for pred in spectrum 
-				; 				do (remove-formula (list pred (cadr w)) kb)))))
 				(let ((k1 w)
 					  (k2 (list (car w) nil)))
 					(if (eql 0 (list-has w (gethash k1 kb)))
@@ -205,6 +205,8 @@
 					(if (eql 0 (list-has w (gethash k2 kb)))
 						(setf (gethash k2 kb) (cons w (gethash k2 kb))))))
 			((eql 3 (list-length w))
+				; (if (equal 'Wumpus_location (cadr (cdr w)))
+				; 	(setf (cadr (cdr w)) (gethash (list (car w) (nth 1 w) nil) kb)))
 				(let ((k1 w)
 					  (k2 (list (car w) (nth 1 w) nil))
 					  (k3 (list (car w) nil (nth 2 w)))
@@ -222,8 +224,6 @@
 
 (defparameter *Wumpus-location*
 	'School)
-; (if (not (null (car (cadr (cdr (gethash '(is_at WUMPUS nil) *beliefs*))))))
-; 	(setf *Wumpus-location* (car (cadr (cdr (gethash '(is_at WUMPUS nil) *beliefs*))))))
 
 (store-formula 
 	(list 'RULE (list nil (list 'is_at 'AG *Wumpus-location*)) 
